@@ -1,0 +1,53 @@
+spring:
+  jackson:
+    serialization:
+      indent_output: true
+
+
+management:
+  endpoints.web.exposure.include:
+    - '*'
+  endpoint.health.show-details: always
+  health.circuitbreakers.enabled: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      someService:
+        register-health-indicator: true
+
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 50
+
+        slow-call-rate-threshold: 50
+        slow-call-duration-threshold:
+          seconds: 1
+
+
+        failureRateThreshold: 20
+        minimumNumberOfCalls: 5
+
+        writable-stack-trace-enabled: true
+        enable-exponential-backoff: true
+
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 5
+
+        ignore-exceptions:
+          - java.lang.IllegalArgumentException
+
+  retry:
+    metrics:
+      enabled: true
+    instances:
+      someService:
+        max-attempts: 5
+        wait-duration:
+          seconds: 2
+        fail-after-max-attempts: false
+
+server:
+  port: 1212
+logging:
+  level:
+    org.springframework.web: debug
